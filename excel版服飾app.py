@@ -18,7 +18,7 @@ with st.sidebar:
 
 uploaded_file = st.file_uploader("請上傳門店客流圖片 (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
-# === 2. 專家決策矩陣 ===
+# === 2. 決策矩陣 ===
 EXPERT_DECISION_MATRIX = {
     "body": {
         "沙漏型": {"剪裁": "合身剪裁、高腰收腰、X字廓形", "說明": "完美展現腰部曲線，避免過度寬鬆掩蓋身形優勢。"},
@@ -47,7 +47,7 @@ def classify_skin_tone(rgb):
     elif b > r and b > g: return "冷色調"
     else: return "中性色調"
 
-# === 3. 局部特徵提取與全局座標映射引擎 ===
+# === 3. 局部特徵提取與全局座標映射 ===
 def process_single_person(img_global, x1, y1, x2, y2):
     person_crop = img_global[y1:y2, x1:x2]
     if person_crop.size == 0: return "無法判斷", "無法分析"
@@ -139,7 +139,7 @@ def process_single_person(img_global, x1, y1, x2, y2):
                 
     return body_type, skin_label
 
-# === 4. 主程式 Web Pipeline ===
+# === 4. 主程式  ===
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     img_rgb = np.array(image)
@@ -153,7 +153,7 @@ if uploaded_file is not None:
     store_skin_stats = {"暖色調": 0, "冷色調": 0, "中性色調": 0, "無法分析": 0}
     person_idx = 0
     
-    # 新增：用來搜集資料匯出 Excel 的列表
+    # 用來搜集資料匯出 Excel 的列表
     export_data_list = []
     
     with st.expander(" 查看個體特徵掃描明細"):
@@ -172,7 +172,7 @@ if uploaded_file is not None:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
                 st.write(f"[P{person_idx}] 體型: {body_type} | 膚色: {skin_label}")
                 
-                # 新增：把每一筆資料存進列表
+                # 把每一筆資料存進列表
                 export_data_list.append({
                     "顧客編號": f"P{person_idx}",
                     "偵測體型": body_type,
@@ -211,13 +211,11 @@ if uploaded_file is not None:
         else:
             st.warning("⚠️ 有效特徵數據不足，建議維持門店標準中性陳列。")
             
-        # ==========================================================
-        #將搜集的數據轉成 DataFrame 並提供 Excel 下載
-        # ==========================================================
-        st.markdown("---")
+                #將搜集的數據轉成 DataFrame 並提供 Excel 下載
+              st.markdown("---")
         st.subheader("資料匯出模組")
         
-        # 1. 將清單轉換為 Pandas DataFrame (表格)
+        # 1. 將清單轉換為 表格
         df_export = pd.DataFrame(export_data_list)
         
         # 2. 在網頁上展示預覽表格
@@ -229,7 +227,7 @@ if uploaded_file is not None:
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             df_export.to_excel(writer, index=False, sheet_name='客流明細')
             
-            # (進階) 你甚至可以把統計數據存到第二個工作表
+            #把統計數據存到第二個工作表
             df_stats = pd.DataFrame([store_body_stats, store_skin_stats], index=["體型統計", "膚色統計"])
             df_stats.to_excel(writer, sheet_name='總計數據')
             
@@ -239,7 +237,7 @@ if uploaded_file is not None:
         st.download_button(
             label="點擊下載完整 Excel 報表",
             data=excel_data,
-            file_name="智慧門店_客流洞察報表.xlsx",
+            file_name="客流洞察報表.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
             
