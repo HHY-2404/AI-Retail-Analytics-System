@@ -7,16 +7,17 @@ from sklearn.cluster import KMeans
 from ultralytics import YOLO
 import pandas as pd  
 import io          
+
 # === 1. 網頁基本設定 ===
 st.set_page_config(page_title="智慧零售客群洞察", layout="wide")
-st.title("智慧零售客群洞察與決策")
+st.title(" 智慧零售客群洞察與決策")
 
 with st.sidebar:
     st.header(" 系統設定")
     api_key = st.text_input("請輸入 Gemini API Key", type="password")
     st.info("請輸入 API 金鑰以啟動大語言模型決策引擎。(此範例主要展示專家矩陣)")
 
-uploaded_file = st.file_uploader("請上傳門店客流圖片 (JPG/PNG)", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("📸 請上傳門店客流圖片 (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
 # === 2. 決策矩陣 ===
 EXPERT_DECISION_MATRIX = {
@@ -139,13 +140,13 @@ def process_single_person(img_global, x1, y1, x2, y2):
                 
     return body_type, skin_label
 
-# === 4. 主程式  ===
+# === 4. 主程式 ===
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     img_rgb = np.array(image)
     img_display = img_rgb.copy()
     
-    st.write("系統開始掃描...")
+    st.write(" 系統開始掃描...")
     model = YOLO('yolov8n.pt')
     results = model(img_rgb, verbose=False)
     
@@ -170,7 +171,7 @@ if uploaded_file is not None:
                 cv2.rectangle(img_display, (x1, y1), (x2, y2), (255, 255, 255), 2)
                 cv2.putText(img_display, f"P{person_idx}: {body_type}({skin_label})", (x1, y1 - 12), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
-                st.write(f"[P{person_idx}] 體型: {body_type} | 膚色: {skin_label}")
+                st.write(f" [P{person_idx}] 體型: {body_type} | 膚色: {skin_label}")
                 
                 # 把每一筆資料存進列表
                 export_data_list.append({
@@ -192,7 +193,7 @@ if uploaded_file is not None:
         majority_body = max(valid_body_stats, key=valid_body_stats.get) if valid_body_stats else "無法判斷"
         majority_skin = max(valid_skin_stats, key=valid_skin_stats.get) if valid_skin_stats else "無法分析"
         
-        st.subheader(f"核心客群畫像 ➔ 體型主導：【{majority_body}】 | 膚色主導：【{majority_skin}】")
+        st.subheader(f" 核心客群畫像 ➔ 體型主導：【{majority_body}】 | 膚色主導：【{majority_skin}】")
         
         if majority_body != "無法判斷" and majority_skin != "無法分析":
             avg_body_rec = EXPERT_DECISION_MATRIX["body"][majority_body]
@@ -211,15 +212,17 @@ if uploaded_file is not None:
         else:
             st.warning("⚠️ 有效特徵數據不足，建議維持門店標準中性陳列。")
             
-                #將搜集的數據轉成 DataFrame 並提供 Excel 下載
-              st.markdown("---")
-        st.subheader("資料匯出模組")
+        # ==========================================
+        # 將搜集的數據轉成 DataFrame 並提供 Excel 下載
+        # ==========================================
+        st.markdown("---")
+        st.subheader(" 資料匯出模組")
         
-        # 1. 將清單轉換為 表格
+        # 1. 將清單轉換為表格
         df_export = pd.DataFrame(export_data_list)
         
         # 2. 在網頁上展示預覽表格
-        st.write("門店客流分析明細 (預覽)：")
+        st.write(" 門店客流分析明細 (預覽)：")
         st.dataframe(df_export, use_container_width=True)
         
         # 3. 建立記憶體緩衝區來產生 Excel 檔案
@@ -227,7 +230,7 @@ if uploaded_file is not None:
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
             df_export.to_excel(writer, index=False, sheet_name='客流明細')
             
-            #把統計數據存到第二個工作表
+            # 把統計數據存到第二個工作表
             df_stats = pd.DataFrame([store_body_stats, store_skin_stats], index=["體型統計", "膚色統計"])
             df_stats.to_excel(writer, sheet_name='總計數據')
             
@@ -235,9 +238,9 @@ if uploaded_file is not None:
         
         # 4. Streamlit 一鍵下載按鈕
         st.download_button(
-            label="點擊下載完整 Excel 報表",
+            label=" 點擊下載完整 Excel 報表",
             data=excel_data,
-            file_name="客流洞察報表.xlsx",
+            file_name="智慧門店_客流洞察報表.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
             
